@@ -25,6 +25,7 @@
       .banner {
         width: 100%;
         max-height: 300px;
+        height: auto;
         object-fit: cover;
         display: block;
       }
@@ -58,6 +59,17 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        position: relative;
+        opacity: 1;
+      }
+      .card.esgotado {
+        opacity: 0.6;
+      }
+      .card img {
+        width: 100%;
+        height: auto;
+        border-radius: 6px;
+        margin-bottom: 0.5rem;
       }
       .card h2 {
         font-size: 1.2rem;
@@ -88,6 +100,17 @@
         text-decoration: none;
         font-weight: bold;
       }
+      .esgotado-banner {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background-color: red;
+        color: white;
+        padding: 2px 6px;
+        font-size: 0.8rem;
+        border-radius: 4px;
+        font-weight: bold;
+      }
     </style>
   </head>
   <body>
@@ -112,16 +135,22 @@
         productList.innerHTML = "";
         produtos.forEach((produto) => {
           const card = document.createElement("div");
-          card.className = "card";
+          const isEsgotado = produto.quantidade === 0;
+          card.className = "card" + (isEsgotado ? " esgotado" : "");
+
           card.innerHTML = `
+            ${isEsgotado ? '<div class="esgotado-banner">ESGOTADO</div>' : ''}
+            <img src="${produto.imagem}" alt="${produto.nome}" />
             <h2>${produto.nome}</h2>
             <p>${produto.descricao}</p>
+            <p><strong>Disponibilidade:</strong> ${produto.quantidade}</p>
             <div class="precos">
               <del>R$ ${produto.preco_original}</del>
               <strong>R$ ${produto.preco_desconto}</strong>
             </div>
-            <a class="whatsapp" target="_blank" href="https://wa.me/5531986483015?text=Olá,%20gostaria%20de%20comprar:%20${encodeURIComponent(produto.nome)}">Comprar agora</a>
+            ${!isEsgotado ? `<a class="whatsapp" target="_blank" href="https://wa.me/5531986483015?text=Olá,%20gostaria%20de%20comprar:%20${encodeURIComponent(produto.nome)}">Comprar agora</a>` : ""}
           `;
+
           productList.appendChild(card);
         });
       }
