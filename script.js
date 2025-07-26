@@ -1,40 +1,52 @@
-const products = [
-  {
-    name: "Batom Matte Rosa",
-    description: "Cor intensa e duração prolongada.",
-    price: "R$ 29,90",
-    image: "https://via.placeholder.com/250x200?text=Batom+Rosa"
-  },
-  {
-    name: "Base Líquida Natural",
-    description: "Cobertura média com acabamento natural.",
-    price: "R$ 49,90",
-    image: "https://via.placeholder.com/250x200?text=Base+Líquida"
-  },
-  {
-    name: "Máscara para Cílios",
-    description: "Volume e definição sem borrar.",
-    price: "R$ 34,90",
-    image: "https://via.placeholder.com/250x200?text=Máscara+Cílios"
-  },
-  {
-    name: "Demaquilante Suave",
-    description: "Remove maquiagem sem agredir a pele.",
-    price: "R$ 39,90",
-    image: "https://via.placeholder.com/250x200?text=Demaquilante"
-  }
-];
+const productList = document.getElementById("product-list");
+const searchInput = document.getElementById("search");
 
-const container = document.getElementById("product-list");
+async function fetchProducts() {
+  const response = await fetch("produtos.json");
+  const produtos = await response.json();
+  return produtos;
+}
 
-products.forEach(p => {
-  const el = document.createElement("div");
-  el.className = "product";
-  el.innerHTML = `
-    <img src="${p.image}" alt="${p.name}" />
-    <h2>${p.name}</h2>
-    <p>${p.description}</p>
-    <p><strong>${p.price}</strong></p>
-  `;
-  container.appendChild(el);
+function renderProducts(produtos) {
+  productList.innerHTML = "";
+  produtos.forEach((produto) => {
+    const card = document.createElement("div");
+    const isEsgotado = produto.quantidade === 0;
+    card.className = "card" + (isEsgotado ? " esgotado" : "");
+
+    card.innerHTML = `
+      ${isEsgotado ? '<div class="esgotado-banner">ESGOTADO</div>' : ""}
+      <img src="${produto.imagem}" alt="${produto.nome}" />
+      <h2>${produto.nome}</h2>
+      <p>${produto.descricao}</p>
+      <p><strong>Disponibilidade:</strong> ${produto.quantidade}</p>
+      <div class="precos">
+        <del>R$ ${produto.preco_original}</del>
+        <strong>R$ ${produto.preco_desconto}</strong>
+      </div>
+      ${
+        !isEsgotado
+          ? `<a class="whatsapp" target="_blank" href="https://wa.me/5531986483015?text=Olá,%20gostaria%20de%20comprar:%20${encodeURIComponent(
+              produto.nome
+            )}">Comprar agora</a>`
+          : ""
+      }
+    `;
+
+    productList.appendChild(card);
+  });
+}
+
+searchInput.addEventListener("input", async (e) => {
+  const searchTerm = e.target.value.toLowerCase();
+  const produtos = await fetchProducts();
+  const filtrados = produtos.filter((p) =>
+    p.nome.toLowerCase().includes(searchTerm)
+  );
+  renderProducts(filtrados);
+});
+
+window.addEventListener("DOMContentLoaded", async () => {
+  const produtos = await fetchProducts();
+  renderProducts(produtos);
 });
